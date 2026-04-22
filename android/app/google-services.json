@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "434939847899",
+    "project_id": "flutter-web-rtc-c4539",
+    "storage_bucket": "flutter-web-rtc-c4539.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:434939847899:android:fc6c6d5f4b522ee6e1d8fe",
+        "android_client_info": {
+          "package_name": "com.example.flutter_web_rtc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPaMl5DP8a8V-IgD11A0gRVSamFwNsqwM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
