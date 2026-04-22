@@ -27,13 +27,20 @@ class CallController extends ChangeNotifier {
   String? _roomId;
   bool _hasRemoteDescription = false;
 
+  // StreamSubscription for the answer subscription
   StreamSubscription<SessionDescriptionModel?>? _answerSubscription;
+  // StreamSubscription for the remote candidate subscription
   StreamSubscription<List<RTCIceCandidate>>? _remoteCandidateSubscription;
+  // State for the call controller
   final CallControllerState _state = CallControllerState();
 
+  // List of pending remote candidates
   final List<RTCIceCandidate> _pendingRemoteCandidates = [];
+  // Set of added candidate keys
   final Set<String> _addedCandidateKeys = <String>{};
 
+
+// These are the getters for the call controller state are get the changes from the state
   bool get isLoading => _state.isLoading;
   String? get activeRoomId => _state.activeRoomId;
   String? get errorMessage => _state.errorMessage;
@@ -45,9 +52,13 @@ class CallController extends ChangeNotifier {
   bool get isTurnConfigured => RtcCallConfig.isTurnConfigured;
 
   Future<void> createRoom() async {
-    await _runGuarded(() async {
+    // Run the guarded action
+    await _runGuarded( () async {
+      // Reset the session
       await _resetSession();
+      // Prepare the connection
       await _prepareConnection(role: CallRole.caller);
+      // Start the remote candidates subscription
 
       // Create room ID first so early ICE candidates are not dropped.
       final provisionalRoomId = await _signalingRepository.createRoom(
@@ -68,7 +79,7 @@ class CallController extends ChangeNotifier {
           sdp: offer.sdp ?? '',
         ),
       );
-
+// Watch the answer from the room means when the answer is received from the remote peer
       _answerSubscription?.cancel();
       _answerSubscription =
           _signalingRepository.watchAnswer(provisionalRoomId).listen((answer) async {
@@ -83,7 +94,9 @@ class CallController extends ChangeNotifier {
   }
 
   Future<void> joinRoom(String roomId) async {
+    // Run the guarded action
     await _runGuarded(() async {
+      // Reset the session
       await _resetSession();
       _roomId = roomId;
       _state.activeRoomId = roomId;
@@ -151,40 +164,47 @@ class CallController extends ChangeNotifier {
   }
 
   Future<void> _prepareConnection({required CallRole role}) async {
+    // Create the peer connection
     _peerConnection =
         await createPeerConnection(RtcCallConfig.peerConnectionConfiguration());
+    // Get the local stream
     _localStream = await navigator.mediaDevices.getUserMedia(
       RtcCallConfig.mediaConstraints,
     );
+    // Set the local stream to the local renderer
     localRenderer.srcObject = _localStream;
+    // Apply the media track states
     _applyMediaTrackStates();
+    // Notify listeners to update the UI
+    notifyListeners();
+    // Add the tracks to the peer connection-tracks means media tracks like audio and video
 
     for (final track in _localStream!.getTracks()) {
       await _peerConnection!.addTrack(track, _localStream!);
     }
-
+// On track means when the remote stream is added to the peer connection
     _peerConnection!.onTrack = (event) {
       if (event.streams.isNotEmpty) {
         remoteRenderer.srcObject = event.streams.first;
         notifyListeners();
       }
     };
-
+// On connection state means when the connection state is changed
     _peerConnection!.onConnectionState = (state) {
       _state.peerConnectionState = state.name;
       notifyListeners();
     };
-
+// On ice connection state means when the ice connection state is changed
     _peerConnection!.onIceConnectionState = (state) {
       _state.iceConnectionState = state.name;
       notifyListeners();
     };
-
+// On ice gathering state means when the ice gathering state is changed
     _peerConnection!.onIceGatheringState = (state) {
       _state.iceGatheringState = state.name;
       notifyListeners();
     };
-
+// On ice candidate means when the ice candidate is added to the peer connection
     _peerConnection!.onIceCandidate = (candidate) async {
       final room = _roomId;
       if (room == null || candidate.candidate == null) return;
@@ -218,9 +238,10 @@ class CallController extends ChangeNotifier {
       }
     });
   }
-
+// Flush the pending candidates means when the remote candidate is added to the peer connection
   Future<void> _flushPendingCandidates() async {
     for (final candidate in _pendingRemoteCandidates) {
+      // The key is the candidate id
       final key =
           '${candidate.candidate}|${candidate.sdpMid}|${candidate.sdpMLineIndex}';
       if (_addedCandidateKeys.contains(key)) continue;
@@ -230,12 +251,18 @@ class CallController extends ChangeNotifier {
     _pendingRemoteCandidates.clear();
   }
 
-  Future<void> _resetSession() async {
+// Reset the session means when the call is ended
+  Future<void> _resetSession() async {  
+    // Cancel the answer subscription
     await _answerSubscription?.cancel();
+    // Cancel the remote candidate subscription
     await _remoteCandidateSubscription?.cancel();
+    // Set the answer subscription to null
     _answerSubscription = null;
+    // Set the remote candidate subscription to null
     _remoteCandidateSubscription = null;
 
+    // Stop the local stream tracks
     for (final track in _localStream?.getTracks() ?? []) {
       await track.stop();
     }
@@ -258,9 +285,13 @@ class CallController extends ChangeNotifier {
   }
 
   void _applyMediaTrackStates() {
+    // Apply the media track states
     MediaTrackHelper.applyLocalTrackState(
+      // The local stream
       stream: _localStream,
+      // The state of the microphone
       isMicMuted: _state.isMicMuted,
+      // The state of the camera
       isCameraOff: _state.isCameraOff,
     );
   }
@@ -269,7 +300,7 @@ class CallController extends ChangeNotifier {
     try {
       _state.isLoading = true;
       _state.errorMessage = null;
-      notifyListeners();
+      notifyListeners(); // Notify listeners to update the UI
       await action();
     } catch (error) {
       _state.errorMessage = error.toString();
