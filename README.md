@@ -11,7 +11,7 @@ Production-style Flutter sample for one-to-one video calling with:
 - Video demo: [Web_RTC_Implementation_demo.mp4](https://drive.google.com/file/d/1r3w9SKGT_KGiqlTJ2IyW_sjNDOVWY2Jg/view?usp=sharing)
 
 <p align="center">
-  <img src="./asset/img/WebRTC_test.png" alt="Flutter WebRTC Demo" width="420"/>
+  <img src="./asset/img/WebRTC_test.png" alt="Flutter WebRTC Demo" width="220"/>
 </p>
 
 ---
