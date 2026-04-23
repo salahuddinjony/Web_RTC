@@ -72,6 +72,7 @@ class CallController extends ChangeNotifier {
       final offer = await _peerConnection!.createOffer();
       await _peerConnection!.setLocalDescription(offer);
 
+// Update the offer means when the offer is created and set the local description then firestore update the offer with the offer sdp and type=offer
       await _signalingRepository.updateOffer(
         roomId: provisionalRoomId,
         offer: SessionDescriptionModel(
@@ -100,9 +101,14 @@ class CallController extends ChangeNotifier {
       await _resetSession();
       _roomId = roomId;
       _state.activeRoomId = roomId;
+
+      // Prepare the connection means when the connection is prepared then the connection is created and the local stream is added to the peer connection
       await _prepareConnection(role: CallRole.callee);
+
+      // Start the remote candidates subscription means when the remote candidates are subscribed then the remote candidates are added to the peer connection
       await _startRemoteCandidatesSubscription(CallRole.callee);
 
+      // Wait for the valid offer means when the offer is valid then the offer is set to the remote description
       final offer = await _waitForValidOffer(roomId);
       if (offer == null) {
         throw Exception(
@@ -110,6 +116,7 @@ class CallController extends ChangeNotifier {
         );
       }
 
+// Set the remote description means when the remote description is set then the remote description is set to the peer connection
       await _peerConnection?.setRemoteDescription(
         RTCSessionDescription(offer.sdp, offer.type),
       );
@@ -119,6 +126,7 @@ class CallController extends ChangeNotifier {
       final answer = await _peerConnection!.createAnswer();
       await _peerConnection!.setLocalDescription(answer);
 
+// Set the answer means when the answer is set in the firestore in same room id then the answer is set to the peer connection
       await _signalingRepository.setAnswer(
         roomId: roomId,
         answer: SessionDescriptionModel(
@@ -130,6 +138,7 @@ class CallController extends ChangeNotifier {
     });
   }
 
+  // Wait for the valid offer means when the offer is valid then the offer is set to the remote description
   Future<SessionDescriptionModel?> _waitForValidOffer(String roomId) async {
     // The caller may create the room document before writing the final offer SDP.
     // Retry briefly so callee does not attempt setRemoteDescription with empty SDP.
