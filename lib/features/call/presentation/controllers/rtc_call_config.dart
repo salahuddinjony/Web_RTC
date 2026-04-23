@@ -2,7 +2,7 @@ class RtcCallConfig {
   RtcCallConfig._();
 
   static const String _turnUrl = String.fromEnvironment(
-    'TURN_URL',
+    'TURN_URL', // The turn url from the environment variables
     defaultValue: 'turn:openrelay.metered.ca:80',
   );
   static const String _turnUsername = String.fromEnvironment(
@@ -16,19 +16,24 @@ class RtcCallConfig {
 
   static bool get isTurnConfigured => _turnUrl.isNotEmpty;
 
+  // The configuration for the peer connection
   static Map<String, dynamic> peerConnectionConfiguration() {
+    // The ice servers
     final iceServers = <Map<String, dynamic>>[
       {'urls': 'stun:stun.l.google.com:19302'},
       {'urls': 'stun:stun1.l.google.com:19302'},
     ];
 
-    final turnUrls = <String>{
-      _turnUrl,
-      'turn:openrelay.metered.ca:443',
-      'turn:openrelay.metered.ca:443?transport=tcp',
-    }.where((url) => url.isNotEmpty).toList();
+    // The turn urls
+    final turnUrls =
+        <String>{
+          _turnUrl,
+          'turn:openrelay.metered.ca:443',
+          'turn:openrelay.metered.ca:443?transport=tcp',
+        }.where((url) => url.isNotEmpty).toList();
 
     if (turnUrls.isNotEmpty) {
+      // Add the turn urls to the ice servers
       iceServers.add({
         'urls': turnUrls,
         'username': _turnUsername,

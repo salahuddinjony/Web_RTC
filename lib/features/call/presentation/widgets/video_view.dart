@@ -5,7 +5,7 @@ class VideoView extends StatelessWidget {
   const VideoView({
     required this.renderer,
     required this.label,
-    this.mirror = false,
+    this.mirror = false, 
     super.key,
   });
 

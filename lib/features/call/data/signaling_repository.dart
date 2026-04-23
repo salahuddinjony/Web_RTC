@@ -13,6 +13,8 @@ class SignalingRepository {
 
   final FirebaseFirestore _firestore;
 
+
+// Collection reference to the rooms collection
   CollectionReference<Map<String, dynamic>> get _rooms =>
       _firestore.collection('rooms');
 
@@ -39,7 +41,7 @@ class SignalingRepository {
   }) {
     return _rooms.doc(roomId).update({'answer': answer.toMap()});
   }
-
+// Get the offer from the room
   Future<SessionDescriptionModel?> getOffer(String roomId) async {
     final snapshot = await _rooms.doc(roomId).get();
     final data = snapshot.data();
@@ -49,6 +51,7 @@ class SignalingRepository {
     );
   }
 
+  // Watch the answer from the room
   Stream<SessionDescriptionModel?> watchAnswer(String roomId) {
     return _rooms.doc(roomId).snapshots().map((snapshot) {
       final data = snapshot.data();
@@ -59,6 +62,7 @@ class SignalingRepository {
     });
   }
 
+// Add the ice candidate to the room
   Future<void> addIceCandidate({
     required String roomId,
     required CallRole role,
