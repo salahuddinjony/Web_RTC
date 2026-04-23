@@ -12,7 +12,7 @@ import 'rtc_call_config.dart';
 
 class CallController extends ChangeNotifier {
   CallController({SignalingRepository? signalingRepository})
-      : _signalingRepository = signalingRepository ?? SignalingRepository() {
+    : _signalingRepository = signalingRepository ?? SignalingRepository() {
     localRenderer.initialize();
     remoteRenderer.initialize();
   }
@@ -39,8 +39,7 @@ class CallController extends ChangeNotifier {
   // Set of added candidate keys
   final Set<String> _addedCandidateKeys = <String>{};
 
-
-// These are the getters for the call controller state are get the changes from the state
+  // These are the getters for the call controller state are get the changes from the state
   bool get isLoading => _state.isLoading;
   String? get activeRoomId => _state.activeRoomId;
   String? get errorMessage => _state.errorMessage;
@@ -53,7 +52,7 @@ class CallController extends ChangeNotifier {
 
   Future<void> createRoom() async {
     // Run the guarded action
-    await _runGuarded( () async {
+    await _runGuarded(() async {
       // Reset the session
       await _resetSession();
       // Prepare the connection
@@ -72,7 +71,7 @@ class CallController extends ChangeNotifier {
       final offer = await _peerConnection!.createOffer();
       await _peerConnection!.setLocalDescription(offer);
 
-// Update the offer means when the offer is created and set the local description then firestore update the offer with the offer sdp and type=offer
+      // Update the offer means when the offer is created and set the local description then firestore update the offer with the offer sdp and type=offer
       await _signalingRepository.updateOffer(
         roomId: provisionalRoomId,
         offer: SessionDescriptionModel(
@@ -80,17 +79,18 @@ class CallController extends ChangeNotifier {
           sdp: offer.sdp ?? '',
         ),
       );
-// Watch the answer from the room means when the answer is received from the remote peer
+      // Watch the answer from the room means when the answer is received from the remote peer
       _answerSubscription?.cancel();
-      _answerSubscription =
-          _signalingRepository.watchAnswer(provisionalRoomId).listen((answer) async {
-        if (answer == null || _hasRemoteDescription) return;
-        await _peerConnection?.setRemoteDescription(
-          RTCSessionDescription(answer.sdp, answer.type),
-        );
-        _hasRemoteDescription = true;
-        await _flushPendingCandidates();
-      });
+      _answerSubscription = _signalingRepository
+          .watchAnswer(provisionalRoomId)
+          .listen((answer) async {
+            if (answer == null || _hasRemoteDescription) return;
+            await _peerConnection?.setRemoteDescription(
+              RTCSessionDescription(answer.sdp, answer.type),
+            );
+            _hasRemoteDescription = true;
+            await _flushPendingCandidates();
+          });
     });
   }
 
@@ -116,7 +116,7 @@ class CallController extends ChangeNotifier {
         );
       }
 
-// Set the remote description means when the remote description is set then the remote description is set to the peer connection
+      // Set the remote description means when the remote description is set then the remote description is set to the peer connection
       await _peerConnection?.setRemoteDescription(
         RTCSessionDescription(offer.sdp, offer.type),
       );
@@ -126,7 +126,7 @@ class CallController extends ChangeNotifier {
       final answer = await _peerConnection!.createAnswer();
       await _peerConnection!.setLocalDescription(answer);
 
-// Set the answer means when the answer is set in the firestore in same room id then the answer is set to the peer connection
+      // Set the answer means when the answer is set in the firestore in same room id then the answer is set to the peer connection
       await _signalingRepository.setAnswer(
         roomId: roomId,
         answer: SessionDescriptionModel(
@@ -174,8 +174,9 @@ class CallController extends ChangeNotifier {
 
   Future<void> _prepareConnection({required CallRole role}) async {
     // Create the peer connection
-    _peerConnection =
-        await createPeerConnection(RtcCallConfig.peerConnectionConfiguration());
+    _peerConnection = await createPeerConnection(
+      RtcCallConfig.peerConnectionConfiguration(),
+    );
     // Get the local stream
     _localStream = await navigator.mediaDevices.getUserMedia(
       RtcCallConfig.mediaConstraints,
@@ -191,29 +192,29 @@ class CallController extends ChangeNotifier {
     for (final track in _localStream!.getTracks()) {
       await _peerConnection!.addTrack(track, _localStream!);
     }
-// On track means when the remote stream is added to the peer connection
+    // On track means when the remote stream is added to the peer connection
     _peerConnection!.onTrack = (event) {
       if (event.streams.isNotEmpty) {
         remoteRenderer.srcObject = event.streams.first;
         notifyListeners();
       }
     };
-// On connection state means when the connection state is changed
+    // On connection state means when the connection state is changed
     _peerConnection!.onConnectionState = (state) {
       _state.peerConnectionState = state.name;
       notifyListeners();
     };
-// On ice connection state means when the ice connection state is changed
+    // On ice connection state means when the ice connection state is changed
     _peerConnection!.onIceConnectionState = (state) {
       _state.iceConnectionState = state.name;
       notifyListeners();
     };
-// On ice gathering state means when the ice gathering state is changed
+    // On ice gathering state means when the ice gathering state is changed
     _peerConnection!.onIceGatheringState = (state) {
       _state.iceGatheringState = state.name;
       notifyListeners();
     };
-// On ice candidate means when the ice candidate is added to the peer connection
+    // On ice candidate means when the ice candidate is added to the peer connection
     _peerConnection!.onIceCandidate = (candidate) async {
       final room = _roomId;
       if (room == null || candidate.candidate == null) return;
@@ -233,21 +234,22 @@ class CallController extends ChangeNotifier {
     _remoteCandidateSubscription = _signalingRepository
         .watchRemoteCandidates(roomId: room, role: role)
         .listen((candidates) async {
-      for (final candidate in candidates) {
-        final key =
-            '${candidate.candidate}|${candidate.sdpMid}|${candidate.sdpMLineIndex}';
-        if (_addedCandidateKeys.contains(key)) continue;
+          for (final candidate in candidates) {
+            final key =
+                '${candidate.candidate}|${candidate.sdpMid}|${candidate.sdpMLineIndex}';
+            if (_addedCandidateKeys.contains(key)) continue;
 
-        if (_hasRemoteDescription) {
-          await _peerConnection?.addCandidate(candidate);
-          _addedCandidateKeys.add(key);
-        } else {
-          _pendingRemoteCandidates.add(candidate);
-        }
-      }
-    });
+            if (_hasRemoteDescription) {
+              await _peerConnection?.addCandidate(candidate);
+              _addedCandidateKeys.add(key);
+            } else {
+              _pendingRemoteCandidates.add(candidate);
+            }
+          }
+        });
   }
-// Flush the pending candidates means when the remote candidate is added to the peer connection
+
+  // Flush the pending candidates means when the remote candidate is added to the peer connection
   Future<void> _flushPendingCandidates() async {
     for (final candidate in _pendingRemoteCandidates) {
       // The key is the candidate id
@@ -260,8 +262,8 @@ class CallController extends ChangeNotifier {
     _pendingRemoteCandidates.clear();
   }
 
-// Reset the session means when the call is ended
-  Future<void> _resetSession() async {  
+  // Reset the session means when the call is ended
+  Future<void> _resetSession() async {
     // Cancel the answer subscription
     await _answerSubscription?.cancel();
     // Cancel the remote candidate subscription

@@ -9,6 +9,7 @@ class IceCandidateModel {
   final String? sdpMid;
   final int? sdpMLineIndex;
 
+  // This method is used to convert the IceCandidateModel to a map
   Map<String, dynamic> toMap() {
     return {
       'candidate': candidate,
@@ -17,6 +18,7 @@ class IceCandidateModel {
     };
   }
 
+// This method is used to create a IceCandidateModel from a map
   factory IceCandidateModel.fromMap(Map<String, dynamic> map) {
     return IceCandidateModel(
       candidate: map['candidate'] as String? ?? '',

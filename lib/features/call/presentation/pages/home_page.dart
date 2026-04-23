@@ -44,9 +44,7 @@ class _HomePageState extends State<HomePage> {
       animation: _controller,
       builder: (context, _) {
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Flutter WebRTC + Firebase'),
-          ),
+          appBar: AppBar(title: const Text('Flutter WebRTC + Firebase')),
           body: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -90,35 +88,42 @@ class _HomePageState extends State<HomePage> {
                   runSpacing: 8,
                   children: [
                     FilledButton.icon(
-                      onPressed: _controller.isLoading
-                          ? null
-                          : () async {
-                              await _controller.createRoom();
-                              final roomId = _controller.activeRoomId;
-                              if (roomId != null) {
-                                _roomIdController.text = roomId;
-                              }
-                            },
+                      onPressed:
+                          _controller.isLoading
+                              ? null
+                              : () async {
+                                await _controller.createRoom();
+                                final roomId = _controller.activeRoomId;
+                                if (roomId != null) {
+                                  _roomIdController.text = roomId;
+                                }
+                              },
                       icon: const Icon(Icons.video_call),
                       label: const Text('Create Room'),
                     ),
                     FilledButton.icon(
-                      onPressed: _controller.isLoading
-                          ? null
-                          : () => _controller.joinRoom(_roomIdController.text.trim()),
+                      onPressed:
+                          _controller.isLoading
+                              ? null
+                              : () => _controller.joinRoom(
+                                _roomIdController.text.trim(),
+                              ),
                       icon: const Icon(Icons.call),
                       label: const Text('Join Room'),
                     ),
                     OutlinedButton.icon(
                       onPressed:
-                          _controller.isLoading ? null : () => _controller.hangUp(),
+                          _controller.isLoading
+                              ? null
+                              : () => _controller.hangUp(),
                       icon: const Icon(Icons.call_end),
                       label: const Text('Hang Up'),
                     ),
                     OutlinedButton.icon(
-                      onPressed: _controller.isLoading
-                          ? null
-                          : () => _controller.toggleMic(),
+                      onPressed:
+                          _controller.isLoading
+                              ? null
+                              : () => _controller.toggleMic(),
                       icon: Icon(
                         _controller.isMicMuted ? Icons.mic_off : Icons.mic,
                       ),
@@ -127,9 +132,10 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     OutlinedButton.icon(
-                      onPressed: _controller.isLoading
-                          ? null
-                          : () => _controller.toggleCamera(),
+                      onPressed:
+                          _controller.isLoading
+                              ? null
+                              : () => _controller.toggleCamera(),
                       icon: Icon(
                         _controller.isCameraOff
                             ? Icons.videocam_off
@@ -166,9 +172,10 @@ class _StatusBar extends StatelessWidget {
       );
     }
 
-    final roomText = controller.activeRoomId != null
-        ? 'Active Room: ${controller.activeRoomId}'
-        : 'No active room';
+    final roomText =
+        controller.activeRoomId != null
+            ? 'Active Room: ${controller.activeRoomId}'
+            : 'No active room';
 
     return Text(
       '$roomText\n'

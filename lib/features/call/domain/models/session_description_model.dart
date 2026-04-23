@@ -1,9 +1,6 @@
 class SessionDescriptionModel {
   // Constructor for creating a new SessionDescriptionModel
-  const SessionDescriptionModel({
-    required this.type,
-    required this.sdp,
-  });
+  const SessionDescriptionModel({required this.type, required this.sdp});
 
   // The type of the session description (e.g. 'offer', 'answer')
   final String type;

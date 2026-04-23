@@ -1,20 +1,18 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-
 import '../domain/models/call_role.dart';
 import '../domain/models/ice_candidate_model.dart';
 import '../domain/models/session_description_model.dart';
 
+// This class is used to store the signaling data in the firestore
 class SignalingRepository {
   SignalingRepository({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
-
-// Collection reference to the rooms collection
+  // Collection reference to the rooms collection
   CollectionReference<Map<String, dynamic>> get _rooms =>
       _firestore.collection('rooms');
 
@@ -41,7 +39,8 @@ class SignalingRepository {
   }) {
     return _rooms.doc(roomId).update({'answer': answer.toMap()});
   }
-// Get the offer from the room
+
+  // Get the offer from the room
   Future<SessionDescriptionModel?> getOffer(String roomId) async {
     final snapshot = await _rooms.doc(roomId).get();
     final data = snapshot.data();
@@ -62,7 +61,7 @@ class SignalingRepository {
     });
   }
 
-// Add the ice candidate to the room
+  // Add the ice candidate to the room
   Future<void> addIceCandidate({
     required String roomId,
     required CallRole role,
@@ -84,11 +83,9 @@ class SignalingRepository {
   }) {
     final collectionName =
         role == CallRole.caller ? 'calleeCandidates' : 'callerCandidates';
-    return _rooms
-        .doc(roomId)
-        .collection(collectionName)
-        .snapshots()
-        .map((snapshot) {
+    return _rooms.doc(roomId).collection(collectionName).snapshots().map((
+      snapshot,
+    ) {
       return snapshot.docs.map((doc) {
         final model = IceCandidateModel.fromMap(doc.data());
         return RTCIceCandidate(

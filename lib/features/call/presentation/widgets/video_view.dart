@@ -5,7 +5,7 @@ class VideoView extends StatelessWidget {
   const VideoView({
     required this.renderer,
     required this.label,
-    this.mirror = false, 
+    this.mirror = false,
     super.key,
   });
 
@@ -37,10 +37,7 @@ class VideoView extends StatelessWidget {
                 color: Colors.black54,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
-                label,
-                style: const TextStyle(color: Colors.white),
-              ),
+              child: Text(label, style: const TextStyle(color: Colors.white)),
             ),
           ),
         ],

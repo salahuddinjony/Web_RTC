@@ -1,4 +1,4 @@
-// this class is used to store the state of the call controller its work like a state management system which is used to store the state of the call controller
+// This class is used to store the state of the call controller its work like a state management system which is used to store the state of the call controller
 class CallControllerState {
   bool isLoading = false;
   String? activeRoomId;
@@ -9,6 +9,7 @@ class CallControllerState {
   String iceConnectionState = 'new';
   String iceGatheringState = 'new';
 
+  // This method is used to reset the session state
   void resetSessionState() {
     activeRoomId = null;
     errorMessage = null;
