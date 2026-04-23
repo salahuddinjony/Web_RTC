@@ -108,6 +108,42 @@ Subcollections:
 - `rooms/{roomId}/callerCandidates`
 - `rooms/{roomId}/calleeCandidates`
 
+### STUN, ICE, and SDP Explained
+
+- **SDP (Session Description Protocol)**
+  - A text description of media capabilities and call setup details.
+  - Contains what each side can send/receive (audio/video codecs, media directions).
+  - In this project:
+    - caller writes `offer` SDP
+    - callee writes `answer` SDP
+
+- **ICE (Interactive Connectivity Establishment)**
+  - The mechanism WebRTC uses to find a working network path between peers.
+  - Each peer gathers multiple connection candidates and tries them until one works.
+  - In this project:
+    - caller candidates are written to `callerCandidates`
+    - callee candidates are written to `calleeCandidates`
+    - each peer listens to the opposite collection and adds remote candidates
+
+- **STUN (Session Traversal Utilities for NAT)**
+  - Helps a peer discover its public-facing address behind NAT/router.
+  - Usually enables direct peer-to-peer when network conditions permit.
+  - In this project, STUN servers are part of the ICE server list.
+
+- **TURN (Traversal Using Relays around NAT)**
+  - Relay server used when direct peer-to-peer fails.
+  - More reliable across strict NAT/firewalls, but adds relay cost/latency.
+  - In this project, TURN is configured in `rtc_call_config.dart`.
+
+### How SDP + ICE + STUN/TURN Work Together
+
+1. Caller and callee first exchange **SDP** (`offer` / `answer`) through Firestore.
+2. Both peers gather **ICE candidates** (host, STUN-reflexive, and possibly TURN relay).
+3. Candidates are exchanged through Firestore subcollections.
+4. WebRTC ICE checks test candidate pairs.
+5. If direct route works, media is peer-to-peer; otherwise it falls back to TURN relay.
+6. Once ICE reaches connected/completed state, continuous audio/video streaming begins.
+
 ---
 
 ## 5) Flow 1: Firebase-Only Signaling Flow
